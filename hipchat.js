@@ -1,9 +1,11 @@
 const XmppClient = require('node-xmpp-client');
 let api = null,
-    xmppClientInstance = null;
+    xmppClientInstance = null,
+    keepAliveTimeout = null;
 
 exports.load = () => {
     exports.config.commandPrefix = exports.config.commandPrefix || '/';
+    exports.config.listenSelf = exports.config.listenSelf || false;
     exports.config.connectHost = exports.config.connectHost || 'chat.hipchat.com';
     exports.config.conferenceDomain = exports.config.conferenceDomain || 'conf.hipchat.com';
 };
@@ -13,7 +15,6 @@ exports.start = (callback) => {
 		jid: `${exports.config.xmppJid}@${exports.config.connectHost}/bot`,
 		password: exports.config.password
 	});
-    xmppClientInstance.connection.socket.setKeepAlive(true, 10000);
 
     class HipchatIntegration extends shim {
         sendMessage (message, thread) {
@@ -34,6 +35,10 @@ exports.start = (callback) => {
 				.c('x', {xmlns: 'http://jabber.org/protocol/muc'});
 			xmppClientInstance.send(joinRoom);
 		}
+
+        keepAliveTimeout = setInterval(() => {
+            xmppClientInstance.send(' ');
+        }, 60000);
 	});
 
 	xmppClientInstance.on('stanza', (stanza) => {
@@ -42,13 +47,12 @@ exports.start = (callback) => {
 			console.error(JSON.stringify(stanza, null, 2));
 			return;
 		}
-        console.log(stanza)
 		if (stanza.is('message') && stanza.attrs.type.endsWith('chat')) {
 			const body = stanza.getChildText('body'),
 				senderId = stanza.attrs.from,
 				senderName = senderId.substring(senderId.indexOf('/') + 1),
 				threadId = senderId + '|' + stanza.attrs.type;
-			if (body === null) {
+			if (body === null || (!exports.config.listenSelf && senderName === exports.config.roomNickname)) {
                 return;
             }
 			callback(api, shim.createEvent(threadId, senderId, senderName, body));
@@ -57,6 +61,8 @@ exports.start = (callback) => {
 };
 
 exports.stop = () => {
+    clearInterval(keepAliveTimeout);
+    keepAliveTimeout = null;
     api = null;
 	xmppClientInstance.end();
 	xmppClientInstance = null;

@@ -14,7 +14,7 @@ To add a configuration, execute each of the following commands (replace each of 
 /kpm config hipchat roomJids ["<XMPP/JabberName of room>",...]
 ```
 
-###### Optional Parameters
+##### Optional Parameters
 For more advanced configuration the following parameters are also avalible:
 
 *Set Hipchat Servers*
@@ -22,6 +22,12 @@ Use this to enable working with private Hipchat servers.
 ```sh
 /kpm config hipchat connectHost "<host, e.g. chat.hipchat.com>"
 /kpm config hipchat conferenceDomain "<domain, e.g. conf.hipchat.com>"
+```
+
+*Set Self-Listening*
+Use this to listen to commands sent by the bot account. This has the potential for infinate loops - be careful...
+```sh
+/kpm config hipchat listenSelf true
 ```
 
 *Set Command Prefix*
