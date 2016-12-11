@@ -1,0 +1,15 @@
+{
+  "name": "hipchat",
+  "version": 1.0,
+  "startup": "hipchat.js",
+  "type": "integration",
+  "config": [
+    [ "xmppJid", "JabberID, excluding @domain. e.g. 123@hipchat.com => 123", "" ],
+    [ "roomNickname", "Nickname of the bot account.", "" ],
+    [ "password", "Password of the bot account.", "" ],
+    [ "roomJids", "XMPP/JabberName of room.", [""] ],
+    [ "connectHost", "Login host server.", "chat.hipchat.com" ],
+    [ "conferenceDomain", "Communication server.", "conf.hipchat.com" ],
+    [ "commandPrefix", "Password of the bot account.", "/" ]
+  ]
+}
